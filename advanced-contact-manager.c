@@ -274,9 +274,9 @@ void add_contacts(void)
     // so stdin is ready for fgets here.
 
     // Get and validate inputs
-    get_valid_input("Enter name: ", contacts[contact_count].name, MAX_NAME_LENGTH, NAME_REGEX, 0);
-    get_valid_input("Enter phone (10 digits): ", contacts[contact_count].phone, MAX_PHONE_LENGTH, PHONE_REGEX, 0);
-    get_valid_input("Enter email: ", contacts[contact_count].email, MAX_EMAIL_LENGTH, EMAIL_REGEX, 0);
+    get_valid_input("Enter name: ", contacts[contact_count].name, MAX_NAME_LENGTH, NAME_REGEX);
+    get_valid_input("Enter phone (10 digits): ", contacts[contact_count].phone, MAX_PHONE_LENGTH, PHONE_REGEX);
+    get_valid_input("Enter email: ", contacts[contact_count].email, MAX_EMAIL_LENGTH, EMAIL_REGEX);
 
     contact_count++;
 
@@ -316,7 +316,7 @@ void update_contact(void)
     }
 
     char name[MAX_NAME_LENGTH];
-    get_valid_input("Enter name to update: ", name, MAX_NAME_LENGTH, NAME_REGEX, 0);
+    get_valid_input("Enter name to update: ", name, MAX_NAME_LENGTH, NAME_REGEX);
 
     int found = 0;
     for (int i = 0; i < contact_count; i++)
@@ -334,15 +334,15 @@ void update_contact(void)
             char tmp[MAX_EMAIL_LENGTH]; // large enough for any field
 
             // Name (optional)
-            get_valid_input("Enter new name: ", tmp, MAX_NAME_LENGTH, NAME_REGEX, 1);
+            get_optional_valid_input("Enter new name: ", tmp, MAX_NAME_LENGTH, NAME_REGEX);
             if (tmp[0] != '\0') strcpy(contacts[i].name, tmp);
 
             // Phone (optional + validated)
-            get_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX, 1);
+           get_optional_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX);
             if (tmp[0] != '\0') strcpy(contacts[i].phone, tmp);
 
             // Email (optional + validated)
-            get_valid_input("Enter new email: ", tmp, MAX_EMAIL_LENGTH, EMAIL_REGEX, 1);
+            get_optional_valid_input("Enter new email: ", tmp, MAX_EMAIL_LENGTH, EMAIL_REGEX);
             if (tmp[0] != '\0') strcpy(contacts[i].email, tmp);
 
             printf("\n✅ Contact updated successfully!\n");
