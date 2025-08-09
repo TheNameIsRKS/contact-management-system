@@ -408,7 +408,7 @@ void search_contact(void)
     }
 
     char name[MAX_NAME_LENGTH];
-    get_valid_input("Enter name: ", name, MAX_NAME_LENGTH, NAME_REGEX, 0); // strict validation
+    get_valid_input("Enter name: ", name, MAX_NAME_LENGTH, NAME_REGEX); // strict validation
 
     int found = 0;
 
