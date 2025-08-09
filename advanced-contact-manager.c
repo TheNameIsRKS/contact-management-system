@@ -303,7 +303,7 @@ void update_contact(void)
     }
 
     char name[MAX_NAME_LENGTH];
-    get_input("Enter name to update: ", name, MAX_NAME_LENGTH, 0);
+    get_input("Enter name to update: ", name, MAX_NAME_LENGTH, NAME_REGEX, 0);
 
     int found = 0;
     for (int i = 0; i < contact_count; i++)
