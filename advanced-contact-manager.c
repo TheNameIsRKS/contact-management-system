@@ -217,26 +217,28 @@ void get_input(const char *prompt, char *buffer, size_t size)
     buffer[strcspn(buffer, "\n")] = '\0';
 }
 
-void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern, int allow_empty)
+// Core function for validated input
+// allow_empty = 0 → empty input is rejected
+// allow_empty = 1 → empty input is accepted
+void get_validated_input(const char *prompt, char *buffer, size_t size,
+                         const char *pattern, int allow_empty)
 {
     while (1)
     {
         get_input(prompt, buffer, size);
 
+        // If empty input
         if (buffer[0] == '\0')
         {
-            if (allow_empty)
-                return; // Keep existing value
-            else
-            {
-                printf("Input cannot be empty. Please try again.\n");
-                continue;
-            }
+            if (allow_empty) return; // Accept empty (keep existing)
+            printf("Input cannot be empty. Please try again.\n");
+            continue;
         }
 
+        // If no pattern OR matches pattern → accept
         if (pattern == NULL || validate_with_regex(pattern, buffer))
         {
-            return; // valid
+            return;
         }
         else
         {
@@ -247,6 +249,7 @@ void get_valid_input(const char *prompt, char *buffer, size_t size, const char *
         }
     }
 }
+
 
 // Strict — no empty allowed
 void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern)
@@ -338,7 +341,7 @@ void update_contact(void)
             if (tmp[0] != '\0') strcpy(contacts[i].name, tmp);
 
             // Phone (optional + validated)
-           get_optional_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX);
+            get_optional_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX);
             if (tmp[0] != '\0') strcpy(contacts[i].phone, tmp);
 
             // Email (optional + validated)
