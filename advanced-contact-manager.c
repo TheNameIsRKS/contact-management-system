@@ -27,7 +27,9 @@ int get_menu_choice(void);
 // New helper prototypes
 void get_input(const char *prompt, char *buffer, size_t size);
 void get_validated_input(const char *prompt, char *buffer, size_t size,
-                         const char *pattern, int allow_empty)
+                         const char *pattern, int allow_empty);
+void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);
+void get_optional_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);
 
 typedef struct
 {
