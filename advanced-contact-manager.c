@@ -248,6 +248,19 @@ void get_valid_input(const char *prompt, char *buffer, size_t size, const char *
     }
 }
 
+// Strict — no empty allowed
+void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern)
+{
+    get_validated_input(prompt, buffer, size, pattern, 0);
+}
+
+// Optional — empty allowed
+void get_optional_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern)
+{
+    get_validated_input(prompt, buffer, size, pattern, 1);
+}
+
+
 // ----------------- Add contact (refactored to use centralized validation) -----------------
 void add_contacts(void)
 {
