@@ -97,42 +97,42 @@ int main(void)
 // ----------------- Sanitization helpers -----------------
 
 // Trim leading & trailing whitespace in-place
-// static void trim_whitespace(char *s) {
-//     if (!s) return;
+static void trim_whitespace(char *s) {
+    if (!s) return;
 
-//     // skip leading
-//     char *start = s;
-//     while (*start && isspace((unsigned char)*start)) start++;
+    // skip leading
+    char *start = s;
+    while (*start && isspace((unsigned char)*start)) start++;
 
-//     // shift left if needed
-//     if (start != s) memmove(s, start, strlen(start) + 1);
+    // shift left if needed
+    if (start != s) memmove(s, start, strlen(start) + 1);
 
-//     // trim trailing
-//     size_t len = strlen(s);
-//     while (len > 0 && isspace((unsigned char)s[len - 1])) {
-//         s[--len] = '\0';
-//     }
-// }
+    // trim trailing
+    size_t len = strlen(s);
+    while (len > 0 && isspace((unsigned char)s[len - 1])) {
+        s[--len] = '\0';
+    }
+}
 
-// // Replace commas with spaces (keeps your CSV format safe)
-// static void replace_commas(char *s) {
-//     if (!s) return;
-//     for (; *s; ++s) {
-//         if (*s == ',') *s = ' ';
-//     }
-// }
+// Replace commas with spaces (keeps your CSV format safe)
+static void replace_commas(char *s) {
+    if (!s) return;
+    for (; *s; ++s) {
+        if (*s == ',') *s = ' ';
+    }
+}
 
-// // Sanitize all fields of a contact: trim then remove commas
-// static void sanitize_contact(Contact *c) {
-//     if (!c) return;
-//     trim_whitespace(c->name);
-//     trim_whitespace(c->phone);
-//     trim_whitespace(c->email);
+// Sanitize all fields of a contact: trim then remove commas
+static void sanitize_contact(Contact *c) {
+    if (!c) return;
+    trim_whitespace(c->name);
+    trim_whitespace(c->phone);
+    trim_whitespace(c->email);
 
-//     replace_commas(c->name);
-//     replace_commas(c->phone);
-//     replace_commas(c->email);
-// }
+    replace_commas(c->name);
+    replace_commas(c->phone);
+    replace_commas(c->email);
+}
 
 // ----------------- Regex util (unchanged) -----------------
 int validate_with_regex(const char *pattern, const char *input) {
@@ -160,7 +160,7 @@ void save_contacts() {
 
     for (int i = 0; i < contact_count; i++) {
         // ensure contact is clean before writing
-        //sanitize_contact(&contacts[i]);
+        sanitize_contact(&contacts[i]);
         fprintf(file, "%s, %s, %s\n",
                 contacts[i].name, contacts[i].phone, contacts[i].email);
     }
@@ -191,7 +191,7 @@ void load_contacts()
                   contacts[contact_count].email) == 3)
     {
         // Sanitize the freshly read contact (handles old or hand-edited files)
-        //sanitize_contact(&contacts[contact_count]);
+        sanitize_contact(&contacts[contact_count]);
 
         contact_count++;
 
@@ -284,7 +284,7 @@ void get_input(const char *prompt, char *buffer, size_t size)
     buffer[strcspn(buffer, "\n")] = '\0';
 
     // <-- centralized trimming -->
-    //trim_whitespace(buffer);
+    trim_whitespace(buffer);
 }
 
 // Core function for validated input
