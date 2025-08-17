@@ -12,8 +12,8 @@
 
 #define NAME_REGEX "^[A-Za-z][A-Za-z '-]{0,48}[A-Za-z]$"
 #define EMAIL_REGEX "^[a-z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-#define INDIAN_PHONE_REGEX "^\\+91[-[:space:]]?[6-9][0-9]{4}[-[:space:]]?[0-9]{5}$|^[6-9][0-9]{9}$"
-#define INTERNATIONAL_PHONE_REGEX "^\\+[1-9][0-9]{0,2}([-[:space:]]?[0-9]{2,4}){2,4}$"
+#define PHONE_REGEX "^((\\+91[-[:space:]]?[6-9][0-9]{4}[-[:space:]]?[0-9]{5})|([6-9][0-9]{9})|(\\+[1-9][0-9]{0,2}([-[:space:]]?[0-9]{2,4}){2,4}))$"
+
 
 // Function prototypes
 void add_contacts(void);
