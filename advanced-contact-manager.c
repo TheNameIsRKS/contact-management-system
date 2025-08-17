@@ -292,35 +292,49 @@ void get_input(const char *prompt, char *buffer, size_t size)
 // Core function for validated input
 // allow_empty = 0 → empty input is rejected
 // allow_empty = 1 → empty input is accepted
+// Validate input with regex, optionally allow empty input
 void get_validated_input(const char *prompt, char *buffer, size_t size,
-                         const char *pattern, int allow_empty)
-{
-    while (1)
-    {
+                         const char *pattern, int allow_empty) {
+    while (1) {
         get_input(prompt, buffer, size);
 
-        // If empty input
-        if (buffer[0] == '\0')
-        {
-            if (allow_empty) return; // Accept empty (keep existing)
-            printf("Input cannot be empty. Please try again.\n");
+        // Empty input handling
+        if (buffer[0] == '\0') {
+            if (allow_empty) return; // accept empty if allowed
+            printf("❌ Input cannot be empty. Please try again.\n");
             continue;
         }
 
-        // If no pattern OR matches pattern → accept
-        if (pattern == NULL || validate_with_regex(pattern, buffer))
-        {
-            return;
+        // Length check
+        if (strlen(buffer) >= size) {
+            printf("❌ Input too long. Maximum length is %zu characters.\n", size - 1);
+            continue;
         }
-        else
-        {
-            if (allow_empty)
-                printf("Invalid format. Please try again (or press Enter to keep existing).\n");
-            else
-                printf("Invalid format. Please try again.\n");
+
+        // Validate regex if provided
+        if (pattern == NULL || validate_with_regex(pattern, buffer)) {
+            return; // ✅ Valid input
         }
+
+        // Invalid format → show specific guidance
+        printf("❌ Invalid format. Please try again%s.\n",
+               allow_empty ? " (or press Enter to keep existing)" : "");
+
+        // Give user an idea of expected format
+        const char *format_msg;
+        if (strcmp(pattern, NAME_REGEX) == 0) {
+            format_msg = "Letters, numbers, spaces, hyphens, or apostrophes (1-48 chars)";
+        } else if (strcmp(pattern, PHONE_REGEX) == 0) {
+            format_msg = "10-12 digits, optional +, hyphens, or spaces (e.g., 123-456-7890)";
+        } else if (strcmp(pattern, CONFIRM_REGEX) == 0) {
+            format_msg = "Single character: 'y' or 'n'";
+        } else {
+            format_msg = "Valid email (e.g., user@domain.com)";
+        }
+        printf("Expected format: %s\n", format_msg);
     }
 }
+
 
 
 // Strict — no empty allowed
