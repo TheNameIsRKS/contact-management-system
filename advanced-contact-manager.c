@@ -323,7 +323,7 @@ void get_validated_input(const char *prompt, char *buffer, size_t size,
         // Give user an idea of expected format
         const char *format_msg;
         if (strcmp(pattern, NAME_REGEX) == 0) {
-            format_msg = "Letters, numbers, spaces, hyphens, or apostrophes (1-48 chars)";
+            format_msg = "Letters, spaces, hyphens, or apostrophes (1-48 chars)";
         } else if (strcmp(pattern, PHONE_REGEX) == 0) {
             format_msg = "10-12 digits, optional +, hyphens, or spaces (e.g., 123-456-7890)";
         } else if (strcmp(pattern, CONFIRM_REGEX) == 0) {
