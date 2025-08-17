@@ -476,20 +476,28 @@ void delete_contacts(void)
     {
         if (strcasecmp(contacts[i].name, name) == 0)
         {
-            // shift left
-            for (int j = i; j < contact_count - 1; j++)
+            printf("\n📞 Contact Found:\n");
+            printf("Name: %s\n", contacts[i].name);
+            printf("Phone: %s\n", contacts[i].phone);
+            printf("Email: %s\n", contacts[i].email);
+            char confirm[3];
+            get_valid_input("Are you sure you want to delete this contact? [y/n]: ", confirm, sizeof(confirm), "^[yn]$", 0);
+            if (confirm[0] == 'y' || confirm[0] == 'Y')
             {
-                contacts[j] = contacts[j + 1];
+                // shift left
+                for (int j = i; j < contact_count - 1; j++)
+                {
+                    contacts[j] = contacts[j + 1];
+                }
+
+                // clear last slot
+                memset(&contacts[contact_count - 1], 0, sizeof(Contact));
+
+                contact_count--;
+                found = 1;
+                printf("Contact '%s' deleted Successfully\n", name);
+                break;
             }
-
-            // clear last slot
-            memset(&contacts[contact_count - 1], 0, sizeof(Contact));
-
-            contact_count--;
-            found = 1;
-            printf("Contact '%s' deleted Successfully\n", name);
-            break;
-        }
     }
     if (!found)
     {
