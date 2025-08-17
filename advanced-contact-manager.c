@@ -423,7 +423,7 @@ void update_contact(void)
             }
 
             // Phone
-            get_optional_valid_input("Enter new phone (e.g., (International: +1-123-456-7890)., (Indian: +91-98765-43210) )", new_phone, MAX_PHONE_LENGTH, PHONE_REGEX);
+            get_optional_valid_input("Enter new phone e.g., (International: +1-123-456-7890)., (Indian: +91-98765-43210): ", new_phone, MAX_PHONE_LENGTH, PHONE_REGEX);
             if (new_phone[0] != '\0' && strcmp(new_phone, contacts[i].phone) != 0)
             {
                 printf("Phone: '%s' → '%s'\n", contacts[i].phone, new_phone);
