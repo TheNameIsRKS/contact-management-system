@@ -664,10 +664,7 @@ void sort_contacts(void)
     printf("2. Phone\n");
     printf("3. Email\n");
 
-    char choice_str[3]; // enough for single digit + null terminator
-    get_choice("Enter choice (1-3): ", 1, 3);
-
-    int choice = choice_str[0] - '0'; // convert char digit to int
+    int choice = get_choice("Enter choice (1-3): ", 1, 3);
 
     SortField field;
     switch (choice)
