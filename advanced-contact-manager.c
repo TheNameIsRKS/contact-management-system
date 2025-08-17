@@ -583,7 +583,7 @@ void merge(Contact arr[], int left, int mid, int right, SortField field)
 
     if (!L || !R) {
         fprintf(stderr, "Memory allocation failed in merge.\n");
-        exit(EXIT_FAILURE);
+        return;
     }
 
     // Copy data to temporary arrays
