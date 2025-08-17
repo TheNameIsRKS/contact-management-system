@@ -349,7 +349,7 @@ void add_contacts(void)
 
     // Get and validate inputs
     get_valid_input("Enter name: ", contacts[contact_count].name, MAX_NAME_LENGTH, NAME_REGEX);
-    get_valid_input("Enter phone (10 digits): ", contacts[contact_count].phone, MAX_PHONE_LENGTH, PHONE_REGEX);
+    get_valid_input("Enter phone e.g., (International: +14155552671), (Indian: +919876543210 or 9876543210):", contacts[contact_count].phone, MAX_PHONE_LENGTH, PHONE_REGEX);
     get_valid_input("Enter email: ", contacts[contact_count].email, MAX_EMAIL_LENGTH, EMAIL_REGEX);
 
     contact_count++;
