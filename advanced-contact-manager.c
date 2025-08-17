@@ -630,48 +630,6 @@ void merge_sort(Contact arr[], int left, int right, SortField field)
     }
 }
 
-int get_choice(const char *prompt, int min, int max) {
-    char *line = NULL;
-    size_t len = 0;
-    long choice;
-    char *endptr;
-
-    while (1) {
-        printf("%s", prompt);
-
-        // getline reads an entire line, allocates if needed
-        ssize_t read = getline(&line, &len, stdin);
-        if (read == -1) {
-            clearerr(stdin); // clear EOF or error
-            continue;
-        }
-
-        // remove trailing newline
-        if (line[read - 1] == '\n') line[read - 1] = '\0';
-
-        // convert string to long integer
-        errno = 0;
-        choice = strtol(line, &endptr, 10);
-
-        // check for invalid input
-        if (endptr == line || *endptr != '\0' || errno != 0) {
-            printf("❌ Invalid input. Please enter a number.\n");
-            continue;
-        }
-
-        // check if choice is in range
-        if (choice < min || choice > max) {
-            printf("❌ Choice must be between %d and %d.\n", min, max);
-            continue;
-        }
-
-        free(line); // free memory allocated by getline
-        line = NULL; // reset pointer for next call
-        return (int)choice;
-    }
-}
-
-
 // Sort contacts
 void sort_contacts(void)
 {
