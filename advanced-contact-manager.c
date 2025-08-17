@@ -384,6 +384,9 @@ void view_contacts(void)
         return;
     }
 
+    // Auto-sort by name before showing
+    merge_sort(contacts, 0, contact_count - 1, SORT_BY_NAME);
+
     printf("\n📒 Contact List (%d):\n", contact_count);
     printf("---------------------------------------------------------------\n");
     printf("%-3s %-15s %-15s %-25s\n", "#", "Name", "Phone", "Email");
@@ -567,6 +570,7 @@ void search_contact(void)
     }
 }
 
+// Merge sort to sort the contacts
 // Merge sort to sort the contacts with dynamic memory management
 void merge(Contact arr[], int left, int mid, int right, SortField field)
 {
@@ -579,7 +583,7 @@ void merge(Contact arr[], int left, int mid, int right, SortField field)
 
     if (!L || !R) {
         fprintf(stderr, "Memory allocation failed in merge.\n");
-        return;
+        return 1;
     }
 
     // Copy data to temporary arrays
@@ -644,7 +648,10 @@ void sort_contacts(void)
     printf("2. Phone\n");
     printf("3. Email\n");
 
-    int choice = get_choice("Enter choice (1-3): ", 1, 3);
+    char choice_str[3]; // enough for single digit + null terminator
+    get_valid_input("Enter choice (1-3): ", choice_str, sizeof(choice_str), "^[1-3]$");
+
+    int choice = choice_str[0] - '0'; // convert char digit to int
 
     SortField field;
     switch (choice)
