@@ -384,9 +384,6 @@ void view_contacts(void)
         return;
     }
 
-    // Auto-sort by name before showing
-    merge_sort(contacts, 0, contact_count - 1, SORT_BY_NAME);
-
     printf("\n📒 Contact List (%d):\n", contact_count);
     printf("---------------------------------------------------------------\n");
     printf("%-3s %-15s %-15s %-25s\n", "#", "Name", "Phone", "Email");
