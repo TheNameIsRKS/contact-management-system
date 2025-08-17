@@ -634,6 +634,22 @@ void merge_sort(Contact arr[], int left, int right, SortField field)
     }
 }
 
+int get_choice(const char *prompt, int min, int max) {
+    int choice;
+    while (1) {
+        printf("%s", prompt);
+        if (scanf("%d", &choice) != 1) {
+            // invalid input (not a number)
+            while (getchar() != '\n'); // clear input buffer
+            printf("❌ Invalid input. Please enter a number.\n");
+        } else if (choice < min || choice > max) {
+            printf("❌ Choice must be between %d and %d.\n", min, max);
+        } else {
+            return choice;
+        }
+    }
+}
+
 // Sort contacts
 void sort_contacts(void)
 {
@@ -649,7 +665,7 @@ void sort_contacts(void)
     printf("3. Email\n");
 
     char choice_str[3]; // enough for single digit + null terminator
-    get_valid_input("Enter choice (1-3): ", choice_str, sizeof(choice_str), "^[1-3]$");
+    get_choice("Enter choice (1-3): ", choice_str, sizeof(choice_str), 1, 3);
 
     int choice = choice_str[0] - '0'; // convert char digit to int
 
