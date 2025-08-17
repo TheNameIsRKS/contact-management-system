@@ -13,7 +13,7 @@
 #define NAME_REGEX "^[A-Za-z][A-Za-z '-]{0,48}[A-Za-z]$"
 #define EMAIL_REGEX "^[a-z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
 #define PHONE_REGEX "^((\\+91[6-9][0-9]{9})|([6-9][0-9]{9})|(\\+[1-9][0-9]{6,14}))$"
-
+#define CONFIRM_REGEX "^[YyNn]$"
 
 // Function prototypes
 void add_contacts(void);
@@ -481,7 +481,7 @@ void delete_contacts(void)
             printf("Phone: %s\n", contacts[i].phone);
             printf("Email: %s\n", contacts[i].email);
             char confirm[3];
-            get_valid_input("Are you sure you want to delete this contact? [y/n]: ", confirm, sizeof(confirm), "^[yn]$", 0);
+            get_valid_input("Are you sure you want to delete this contact? [y/n]: ", confirm, sizeof(confirm), CONFIRM_REGEX);
             if (confirm[0] == 'y' || confirm[0] == 'Y')
             {
                 // shift left
