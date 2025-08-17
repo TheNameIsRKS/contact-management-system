@@ -577,8 +577,6 @@ void merge(Contact arr[], int left, int mid, int right, SortField field)
 
     Contact L[n1], R[n2];
 
-    Contact *n1 = malloc(sizeof())
-
     for (int i = 0; i < n1; i++)
     {
         L[i] = arr[left + i];
