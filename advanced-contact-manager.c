@@ -12,7 +12,7 @@
 
 #define NAME_REGEX "^[A-Za-z][A-Za-z '-]{0,48}[A-Za-z]$"
 #define EMAIL_REGEX "^[a-z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-#define PHONE_REGEX "^[0-9]{10}$"
+#define PHONE_REGEX "^(?:\+91[-\s]?[6-9]\d{4}[-\s]?\d{5}|[6-9]\d{9}|\+(?!91)[1-9]\d{1,3}(?:[-\s]?\d{2,4}){2,4})$"
 
 // Function prototypes
 void add_contacts(void);
@@ -423,7 +423,7 @@ void update_contact(void)
             }
 
             // Phone
-            get_optional_valid_input("Enter new phone (e.g., (International: 123-456-7890)., (Indian: +91-98765-43210) )", new_phone, MAX_PHONE_LENGTH, PHONE_REGEX);
+            get_optional_valid_input("Enter new phone (e.g., (International: +1-123-456-7890)., (Indian: +91-98765-43210) )", new_phone, MAX_PHONE_LENGTH, PHONE_REGEX);
             if (new_phone[0] != '\0' && strcmp(new_phone, contacts[i].phone) != 0)
             {
                 printf("Phone: '%s' → '%s'\n", contacts[i].phone, new_phone);
