@@ -415,7 +415,7 @@ void update_contact(void)
             int updated = 0;
 
             // Name
-            get_optional_valid_input("Enter new name: ", new_name, MAX_NAME_LENGTH, NAME_REGEX);
+            get_optional_valid_input("Enter new name (1-48 chars): ", new_name, MAX_NAME_LENGTH, NAME_REGEX);
             if (new_name[0] != '\0' && strcmp(new_name, contacts[i].name) != 0)
             {
                 printf("Name: '%s' → '%s'\n", contacts[i].name, new_name);
@@ -433,7 +433,7 @@ void update_contact(void)
             }
 
             // Email
-            get_optional_valid_input("Enter new email: ", new_email, MAX_EMAIL_LENGTH, EMAIL_REGEX);
+            get_optional_valid_input("Enter new email (e.g., user@domain.com): ", new_email, MAX_EMAIL_LENGTH, EMAIL_REGEX);
             if (new_email[0] != '\0' && strcmp(new_email, contacts[i].email) != 0)
             {
                 printf("Email: '%s' → '%s'\n", contacts[i].email, new_email);
