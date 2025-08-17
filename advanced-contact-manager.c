@@ -414,7 +414,7 @@ void update_contact(void)
             int updated = 0;
 
             // Name
-            get_optional_valid_input("Enter new name: ", tmp, MAX_NAME_LENGTH, NAME_REGEX);
+            get_optional_valid_input("Enter new name: ", new_name, MAX_NAME_LENGTH, NAME_REGEX);
             if (new_name[0] != '\0' && strcmp(new_name, contacts[i].name) != 0)
             {
                 printf("Name: '%s' → '%s'\n", contacts[i].name, new_name);
@@ -423,20 +423,20 @@ void update_contact(void)
             }
 
             // Phone
-            get_optional_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX);
-            if ([0] != '\0' && strcmp(tmp, contacts[i].phone) != 0)
+            get_optional_valid_input("Enter new phone (10 digits): ", new_phone, MAX_PHONE_LENGTH, PHONE_REGEX);
+            if (new_phone[0] != '\0' && strcmp(new_phone, contacts[i].phone) != 0)
             {
-                printf("Phone: '%s' → '%s'\n", contacts[i].phone, tmp);
-                snprintf(contacts[i].phone, sizeof(contacts[i].phone), "%s", tmp);
+                printf("Phone: '%s' → '%s'\n", contacts[i].phone, new_phone);
+                snprintf(contacts[i].phone, sizeof(contacts[i].phone), "%s", new_phone);
                 updated = 1;
             }
 
             // Email
-            get_optional_valid_input("Enter new email: ", tmp, MAX_EMAIL_LENGTH, EMAIL_REGEX);
-            if (tmp[0] != '\0' && strcmp(tmp, contacts[i].email) != 0)
+            get_optional_valid_input("Enter new email: ", new_email, MAX_EMAIL_LENGTH, EMAIL_REGEX);
+            if (new_email[0] != '\0' && strcmp(new_email, contacts[i].email) != 0)
             {
-                printf("Email: '%s' → '%s'\n", contacts[i].email, tmp);
-                snprintf(contacts[i].email, sizeof(contacts[i].email), "%s", tmp);
+                printf("Email: '%s' → '%s'\n", contacts[i].email, new_email);
+                snprintf(contacts[i].email, sizeof(contacts[i].email), "%s", new_email);
                 updated = 1;
             }
 
