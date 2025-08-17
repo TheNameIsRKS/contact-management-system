@@ -634,7 +634,7 @@ int get_choice(const char *prompt, int min, int max) {
     int choice;
     while (1) {
         printf("%s", prompt);
-        if (fscanf("%d", &choice) != 1) {
+        if (scanf("%d", &choice) != 1) {
             // invalid input (not a number)
             while (getchar() != '\n'); // clear input buffer
             printf("❌ Invalid input. Please enter a number.\n");
