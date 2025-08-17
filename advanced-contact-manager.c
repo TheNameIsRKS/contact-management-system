@@ -408,21 +408,23 @@ void update_contact(void)
 
             printf("Enter new details (press Enter to keep existing value)\n");
 
-            char tmp[MAX_EMAIL_LENGTH]; // largest buffer for reuse
+            char new_name[MAX_NAME_LENGTH];
+            char new_email[MAX_EMAIL_LENGTH];
+            char new_phone[MAX_PHONE_LENGTH];
             int updated = 0;
 
             // Name
             get_optional_valid_input("Enter new name: ", tmp, MAX_NAME_LENGTH, NAME_REGEX);
-            if (tmp[0] != '\0' && strcmp(tmp, contacts[i].name) != 0)
+            if (new_name[0] != '\0' && strcmp(new_name, contacts[i].name) != 0)
             {
-                printf("Name: '%s' → '%s'\n", contacts[i].name, tmp);
-                snprintf(contacts[i].name, sizeof(contacts[i].name), "%s", tmp);
+                printf("Name: '%s' → '%s'\n", contacts[i].name, new_name);
+                snprintf(contacts[i].name, sizeof(contacts[i].name), "%s", new_name);
                 updated = 1;
             }
 
             // Phone
             get_optional_valid_input("Enter new phone (10 digits): ", tmp, MAX_PHONE_LENGTH, PHONE_REGEX);
-            if (tmp[0] != '\0' && strcmp(tmp, contacts[i].phone) != 0)
+            if ([0] != '\0' && strcmp(tmp, contacts[i].phone) != 0)
             {
                 printf("Phone: '%s' → '%s'\n", contacts[i].phone, tmp);
                 snprintf(contacts[i].phone, sizeof(contacts[i].phone), "%s", tmp);
