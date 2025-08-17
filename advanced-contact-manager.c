@@ -465,11 +465,12 @@ void update_contact(void)
             if (updated)
                 printf("\n✅ Contact updated successfully!\n\n");
             else
+            {
                 printf("\nℹ️ No changes were made to the contact.\n");
                 printf("Name: %s\n", contacts[i].name);
                 printf("Phone: %s\n", contacts[i].phone);
                 printf("Email: %s\n\n", contacts[i].email);
-
+            }
             break;
         }
     }
