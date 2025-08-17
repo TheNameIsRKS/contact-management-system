@@ -498,6 +498,7 @@ void delete_contacts(void)
                 printf("Contact '%s' deleted Successfully\n", name);
                 break;
             }
+        }
     }
     if (!found)
     {
