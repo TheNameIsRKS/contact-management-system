@@ -433,6 +433,11 @@ void update_contact(void)
             get_optional_valid_input("Enter new name (1-48 chars): ", new_name, MAX_NAME_LENGTH, NAME_REGEX);
             if (new_name[0] != '\0' && strcmp(new_name, contacts[i].name) != 0)
             {
+                for (int j = 0; j < contact_count; j++) {
+                if (j != i && my_strcasecmp(contacts[j].name, new_name) == 0) {
+                        printf("Cannot update: Name '%s' already exists.\n", new_name);
+                        return;
+                    }
                 printf("Name: '%s' → '%s'\n", contacts[i].name, new_name);
                 snprintf(contacts[i].name, sizeof(contacts[i].name), "%s", new_name);
                 updated = 1;
