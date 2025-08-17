@@ -1,5 +1,4 @@
 #include <ctype.h>     // for isspace(), used by trimming helper
-#include <errno.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
