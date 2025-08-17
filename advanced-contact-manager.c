@@ -567,7 +567,6 @@ void search_contact(void)
     }
 }
 
-// Merge sort to sort the contacts
 // Merge sort to sort the contacts with dynamic memory management
 void merge(Contact arr[], int left, int mid, int right, SortField field)
 {
