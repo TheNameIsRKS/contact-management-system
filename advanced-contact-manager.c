@@ -13,7 +13,7 @@
 #define NAME_REGEX "^[A-Za-z][A-Za-z '-]{0,48}[A-Za-z]$"
 #define EMAIL_REGEX "^[a-z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
 #define PHONE_REGEX "^((\\+91[6-9][0-9]{9})|([6-9][0-9]{9})|(\\+[1-9][0-9]{6,14}))$"
-#define CONFIRM_REGEX "^[YyNn]$"
+#define CONFIRM_REGEX "^[yYnN]$"
 
 // Function prototypes
 void add_contacts(void);
