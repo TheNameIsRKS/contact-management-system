@@ -128,6 +128,9 @@ int main(void)
                 export_to_vcf("contacts.vcf");
                 break;
             case 8:
+                import_from_vcf("contacts.vcf");
+                break;
+            case 9:
                 printf("Exiting the program. Goodbye!\n");  // Exit message
                 break;
             default:
@@ -395,7 +398,8 @@ void show_menu(void)
     printf("5. Update Contact\n");       // Option 5
     printf("6. Sort Contacts\n");        // Option 6
     printf("7. Export Contacts\n");      // Option 7
-    printf("8. Exit\n");                 // Option 8
+    printf("8. Import Contacts\n");      // Option 8
+    printf("9. Exit\n");                 // Option 9
 }
 
 // Gets and validates user menu choice
