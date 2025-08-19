@@ -138,6 +138,70 @@ int main(void)
     save_contacts();      // Save contacts to file before exiting
 }
 
+// Function to import contacts from VCF file
+void import_from_vcf(const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (!file)
+    {
+        printf("❌ Could not open %s for reading.\n", filename);
+        return;
+    }
+
+    char line[256];
+    char name[MAX_NAME_LENGTH] = "";
+    char phone[MAX_PHONE_LENGTH] = "";
+    char email[MAX_EMAIL_LENGTH] = "";
+
+    while (fgets(line, sizeof(line), file))
+    {
+        // Remove newline
+        line[strcspn(line, "\r\n")] = 0;
+
+        if (strncmp(line, "FN:", 3) == 0) // Full name
+        {
+            strncpy(name, line + 3, MAX_NAME_LENGTH - 1);
+            name[MAX_NAME_LENGTH - 1] = '\0';
+        }
+        else if (strncmp(line, "TEL", 3) == 0) // Phone
+        {
+            char *p = strchr(line, ':');
+            if (p)
+            {
+                strncpy(phone, p + 1, MAX_PHONE_LENGTH - 1);
+                phone[MAX_PHONE_LENGTH - 1] = '\0';
+            }
+        }
+        else if (strncmp(line, "EMAIL", 5) == 0) // Email
+        {
+            char *p = strchr(line, ':');
+            if (p)
+            {
+                strncpy(email, p + 1, MAX_EMAIL_LENGTH - 1);
+                email[MAX_EMAIL_LENGTH - 1] = '\0';
+            }
+        }
+        else if (strncmp(line, "END:VCARD", 9) == 0) // Contact finished
+        {
+            if (contact_count < MAX_CONTACTS)
+            {
+                strncpy(contacts[contact_count].name, name, MAX_NAME_LENGTH);
+                strncpy(contacts[contact_count].phone, phone, MAX_PHONE_LENGTH);
+                strncpy(contacts[contact_count].email, email, MAX_EMAIL_LENGTH);
+                contact_count++;
+            }
+
+            // Reset for next vCard
+            name[0] = '\0';
+            phone[0] = '\0';
+            email[0] = '\0';
+        }
+    }
+
+    fclose(file);
+    printf("✅ Imported %d contacts from %s\n", contact_count, filename);
+}
+
 // Export all contacts to a VCF (vCard) file
 void export_to_vcf(const char *filename) {
     FILE *fp = fopen(filename, "w");  // Open file in write mode
