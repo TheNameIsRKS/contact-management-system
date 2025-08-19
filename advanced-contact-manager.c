@@ -202,34 +202,34 @@ void import_from_vcf(const char *filename)
     printf("✅ Imported %d contacts from %s\n", contact_count, filename);
 }
 
-// Export all contacts to a VCF (vCard) file
+// Export all contacts to a VCF (vCard) file with proper types
 void export_to_vcf(const char *filename) {
     FILE *fp = fopen(filename, "w");  // Open file in write mode
     if (!fp) {
-        printf("❌ Error: Could not open %s for writing.\n", filename);  // Error if file cannot be opened
+        printf("❌ Error: Could not open %s for writing.\n", filename);
         return;
     }
 
     // Loop through all saved contacts
     for (int i = 0; i < contact_count; i++) {
-        fprintf(fp, "BEGIN:VCARD\n");       // Start of a vCard
-        fprintf(fp, "VERSION:3.0\n");       // vCard version
+        fprintf(fp, "BEGIN:VCARD\n");
+        fprintf(fp, "VERSION:3.0\n");
 
-        fprintf(fp, "FN:%s\n", contacts[i].name);  // Full name field
+        fprintf(fp, "FN:%s\n", contacts[i].name);  // Full Name
 
-        // If phone is not empty, write it
+        // Phone stored as Mobile
         if (strlen(contacts[i].phone) > 0)
-            fprintf(fp, "TEL:%s\n", contacts[i].phone);
+            fprintf(fp, "TEL;TYPE=CELL:%s\n", contacts[i].phone);
 
-        // If email is not empty, write it
+        // Email stored as Work
         if (strlen(contacts[i].email) > 0)
-            fprintf(fp, "EMAIL:%s\n", contacts[i].email);
+            fprintf(fp, "EMAIL;TYPE=WORK:%s\n", contacts[i].email);
 
-        fprintf(fp, "END:VCARD\n\n");  // End of this vCard (blank line after each contact)
+        fprintf(fp, "END:VCARD\n\n");  // End of vCard
     }
 
-    fclose(fp);  // Close the file to save changes
-    printf("✅ Contacts exported successfully to %s\n", filename);  // Success message
+    fclose(fp);  // Close file
+    printf("✅ Contacts exported successfully to %s\n", filename);
 }
 
 
