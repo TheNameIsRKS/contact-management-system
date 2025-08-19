@@ -66,6 +66,7 @@ void save_contacts(void);        // Saves contacts to file
 int get_menu_choice(void);       // Gets and validates menu choice
 void sort_contacts(void);        // Sorts contacts based on user choice
 void export_to_vcf(const char *filename);
+void import_from_vcf(const char *filename);
 
 // Helper function prototypes for input handling and sorting
 int get_input(const char *prompt, char *buffer, size_t size);  // Reads input safely
