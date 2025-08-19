@@ -65,6 +65,7 @@ void load_contacts(void);        // Loads contacts from file
 void save_contacts(void);        // Saves contacts to file
 int get_menu_choice(void);       // Gets and validates menu choice
 void sort_contacts(void);        // Sorts contacts based on user choice
+void export_to_vcf(const char *filename);
 
 // Helper function prototypes for input handling and sorting
 int get_input(const char *prompt, char *buffer, size_t size);  // Reads input safely
@@ -124,6 +125,9 @@ int main(void)
                 sort_contacts();  // Sort contacts
                 break;
             case 7:
+                export_to_vcf("contacts.vcf");
+                break;
+            case 8:
                 printf("Exiting the program. Goodbye!\n");  // Exit message
                 break;
             default:
@@ -133,6 +137,37 @@ int main(void)
     while (choice != 7);  // Continue until user chooses to exit
     save_contacts();      // Save contacts to file before exiting
 }
+
+// Export all contacts to a VCF (vCard) file
+void export_to_vcf(const char *filename) {
+    FILE *fp = fopen(filename, "w");  // Open file in write mode
+    if (!fp) {
+        printf("❌ Error: Could not open %s for writing.\n", filename);  // Error if file cannot be opened
+        return;
+    }
+
+    // Loop through all saved contacts
+    for (int i = 0; i < contact_count; i++) {
+        fprintf(fp, "BEGIN:VCARD\n");       // Start of a vCard
+        fprintf(fp, "VERSION:3.0\n");       // vCard version
+
+        fprintf(fp, "FN:%s\n", contacts[i].name);  // Full name field
+
+        // If phone is not empty, write it
+        if (strlen(contacts[i].phone) > 0)
+            fprintf(fp, "TEL:%s\n", contacts[i].phone);
+
+        // If email is not empty, write it
+        if (strlen(contacts[i].email) > 0)
+            fprintf(fp, "EMAIL:%s\n", contacts[i].email);
+
+        fprintf(fp, "END:VCARD\n\n");  // End of this vCard (blank line after each contact)
+    }
+
+    fclose(fp);  // Close the file to save changes
+    printf("✅ Contacts exported successfully to %s\n", filename);  // Success message
+}
+
 
 // ----------------- Sanitization helpers -----------------
 
@@ -295,7 +330,8 @@ void show_menu(void)
     printf("4. Delete Contacts\n");      // Option 4
     printf("5. Update Contact\n");       // Option 5
     printf("6. Sort Contacts\n");        // Option 6
-    printf("7. Exit\n");                 // Option 7
+    printf("7. Export Contacts\n");      // Option 7
+    printf("8. Exit\n");                 // Option 8
 }
 
 // Gets and validates user menu choice
