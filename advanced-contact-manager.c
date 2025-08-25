@@ -124,11 +124,11 @@
 #define MAX_PHONE_LENGTH 17  // Maximum length for phone number (16 + '\0')
 #define MAX_EMAIL_LENGTH 254 // Maximum length for email address (RFC-ish max)
 
-#define NAME_REGEX                                                                                 \
+#define NAME_REGEX                                                                                 
     "^[A-Za-z][A-Za-z '-]{0,48}[A-Za-z]$" // Regex for valid name (letters, spaces, hyphens,
                                           // apostrophes)
 #define EMAIL_REGEX "^[a-z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" // Regex for valid email format
-#define PHONE_REGEX                                                                                \
+#define PHONE_REGEX
     "^((\\+91[6-9][0-9]{9})|([6-9][0-9]{9})|(\\+[1-9][0-9]{6,14}))$" // Regex for valid phone
                                                                      // numbers
 #define CONFIRM_REGEX "^[yYnN]$"    // Regex for y/n confirmation input
