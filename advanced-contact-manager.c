@@ -145,6 +145,7 @@ void load_contacts(void);   // Loads contacts from file
 void save_contacts(void);   // Saves contacts to file
 int get_menu_choice(void);  // Gets and validates menu choice
 void sort_contacts(void);   // Sorts contacts based on user choice
+int validate_with_regex(const char *pattern, const char *input);
 
 typedef struct
 {
