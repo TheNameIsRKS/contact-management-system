@@ -455,14 +455,14 @@ void load_contacts(void)
 
     contact_count = 0; // Reset contact count
 
-    char line[100]; // Buffer for reading lines
+    char line[512]; // Buffer for reading lines
     while (fgets(line, sizeof(line), file) != NULL && contact_count < MAX_CONTACTS)
     {
         // Remove trailing newline
         line[strcspn(line, "\n")] = '\0';
 
         // Build the sscanf format string dynamically so it always matches the macros
-        char fmt[64];
+        char fmt[96];
         snprintf(fmt, sizeof(fmt), "%%%d[^,], %%%d[^,], %%%d[^\n]", MAX_NAME_LENGTH - 1,
                  MAX_PHONE_LENGTH - 1, MAX_EMAIL_LENGTH - 1);
 
