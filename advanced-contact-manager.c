@@ -236,102 +236,74 @@ int main(void)
     save_contacts(); // Save contacts to file before exiting
 }
 
-// Function to import contacts from VCF file
-void import_from_vcf(const char *filename)
-{
-    FILE *file = fopen(filename, "r"); // Open VCF file in read mode
-    if (!file)
-    {
-        printf("❌ Could not open %s for reading.\n", filename);
-        return;
+void load_contacts(void) {
+    FILE *file = fopen("contacts.txt", "r");
+    if (!file) { printf("📂 No contacts file found. Starting fresh.\n"); return; }
+
+    contact_count = 0;
+    char line[512]; // was 100
+    while (fgets(line, sizeof(line), file) && contact_count < MAX_CONTACTS) {
+        line[strcspn(line, "\n")] = '\0';
+        char fmt[96];
+        snprintf(fmt, sizeof(fmt), "%%%d[^,], %%%d[^,], %%%d[^\n]",
+                 MAX_NAME_LENGTH - 1, MAX_PHONE_LENGTH - 1, MAX_EMAIL_LENGTH - 1);
+
+        if (sscanf(line, fmt,
+                   contacts[contact_count].name,
+                   contacts[contact_count].phone,
+                   contacts[contact_count].email) != 3) {
+            printf("Warning: Skipping malformed line: '%s'\n", line);
+            continue;
+        }
+
+        sanitize_contact(&contacts[contact_count]);
+        if (!validate_with_regex(NAME_REGEX, contacts[contact_count].name) ||
+            !validate_with_regex(PHONE_REGEX, contacts[contact_count].phone) ||
+            !validate_with_regex(EMAIL_REGEX, contacts[contact_count].email)) {
+            printf("Warning: Invalid data, skipping: '%s'\n", line);
+            continue;
+        }
+
+        contact_count++;
     }
+    fclose(file);
+    printf("📁 %d contact(s) loaded from file.\n", contact_count);
+}
 
-    char line[256]; // Buffer to store each line from file
-    char name[MAX_NAME_LENGTH] = "";
-    char phone[MAX_PHONE_LENGTH] = "";
-    char email[MAX_EMAIL_LENGTH] = "";
+void import_from_vcf(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) { printf("❌ Could not open %s for reading.\n", filename); return; }
 
-    while (fgets(line, sizeof(line), file)) // Read file line by line
-    {
-        // Remove newline characters (\r or \n) at the end of the line
+    int before = contact_count;
+    char line[512], name[MAX_NAME_LENGTH]="", phone[MAX_PHONE_LENGTH]="", email[MAX_EMAIL_LENGTH]="";
+
+    while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\r\n")] = 0;
-
-        if (strncmp(line, "FN:", 3) == 0) // Full name line found
-        {
-            strncpy(name, line + 3, MAX_NAME_LENGTH - 1); // Copy after "FN:"
-            name[MAX_NAME_LENGTH - 1] = '\0';             // Ensure null termination
-        }
-        else if (strncmp(line, "TEL", 3) == 0) // Phone line found
-        {
-            char *p = strchr(line, ':'); // Find ':' to skip "TEL;TYPE=..."
-            if (p)
-            {
-                strncpy(phone, p + 1, MAX_PHONE_LENGTH - 1); // Copy number
-                phone[MAX_PHONE_LENGTH - 1] = '\0';
+        if (!strncmp(line, "FN:", 3)) {
+            snprintf(name, sizeof(name), "%s", line + 3);
+        } else if (!strncmp(line, "TEL", 3)) {
+            char *p = strchr(line, ':'); if (p) snprintf(phone, sizeof(phone), "%s", p + 1);
+        } else if (!strncmp(line, "EMAIL", 5)) {
+            char *p = strchr(line, ':'); if (p) snprintf(email, sizeof(email), "%s", p + 1);
+        } else if (!strncmp(line, "END:VCARD", 9)) {
+            if (contact_count < MAX_CONTACTS) {
+                Contact c; snprintf(c.name,sizeof(c.name),"%s",name);
+                snprintf(c.phone,sizeof(c.phone),"%s",phone);
+                snprintf(c.email,sizeof(c.email),"%s",email);
+                sanitize_contact(&c);
+                if (validate_with_regex(NAME_REGEX, c.name) &&
+                    validate_with_regex(PHONE_REGEX, c.phone) &&
+                    validate_with_regex(EMAIL_REGEX, c.email)) {
+                    contacts[contact_count++] = c;
+                }
             }
-        }
-        else if (strncmp(line, "EMAIL", 5) == 0) // Email line found
-        {
-            char *p = strchr(line, ':'); // Find ':' to skip "EMAIL;TYPE=..."
-            if (p)
-            {
-                strncpy(email, p + 1, MAX_EMAIL_LENGTH - 1); // Copy email
-                email[MAX_EMAIL_LENGTH - 1] = '\0';
-            }
-        }
-        else if (strncmp(line, "END:VCARD", 9) == 0) // End of one contact
-        {
-            if (contact_count < MAX_CONTACTS) // Store contact if not full
-            {
-                strncpy(contacts[contact_count].name, name, MAX_NAME_LENGTH);
-                strncpy(contacts[contact_count].phone, phone, MAX_PHONE_LENGTH);
-                strncpy(contacts[contact_count].email, email, MAX_EMAIL_LENGTH);
-                contact_count++; // Increase total contact count
-            }
-
-            // Reset for next contact
-            name[0] = '\0';
-            phone[0] = '\0';
-            email[0] = '\0';
+            name[0]=phone[0]=email[0]='\0';
         }
     }
-
-    fclose(file); // Close VCF file after reading
-    printf("✅ Imported %d contacts from %s\n", contact_count, filename);
+    fclose(file);
+    printf("✅ Imported %d contacts from %s\n", contact_count - before, filename);
 }
 
-// Export all contacts to a VCF (vCard) file with proper types
-void export_to_vcf(const char *filename)
-{
-    FILE *fp = fopen(filename, "w"); // Open VCF file in write mode
-    if (!fp)
-    {
-        printf("❌ Error: Could not open %s for writing.\n", filename);
-        return;
-    }
-
-    // Loop through all saved contacts and write them in vCard format
-    for (int i = 0; i < contact_count; i++)
-    {
-        fprintf(fp, "BEGIN:VCARD\n");
-        fprintf(fp, "VERSION:3.0\n");
-
-        fprintf(fp, "FN:%s\n", contacts[i].name); // Write Full Name
-
-        // Phone is always exported as "Mobile"
-        if (strlen(contacts[i].phone) > 0)
-            fprintf(fp, "TEL;TYPE=CELL:%s\n", contacts[i].phone);
-
-        // Email is always exported as "Work"
-        if (strlen(contacts[i].email) > 0)
-            fprintf(fp, "EMAIL;TYPE=WORK:%s\n", contacts[i].email);
-
-        fprintf(fp, "END:VCARD\n\n"); // End of one vCard
-    }
-
-    fclose(fp); // Close VCF file after writing
-    printf("✅ Contacts exported successfully to %s\n", filename);
-}
 
 // ----------------- Sanitization helpers -----------------
 
