@@ -725,13 +725,13 @@ void view_contacts(void)
     // Print table header
     printf("\n📒 Contact List (%d):\n", contact_count);
     printf("-------------------------------------------------------------------------\n");
-    printf("%-3s %-30s %-15s %-25s\n", "#", "Name", "Phone", "Email");
+    printf("%-3s %-30s %-16s %-25s\n", "#", "Name", "Phone", "Email");
     printf("-------------------------------------------------------------------------\n");
 
     // Print each contact
     for (int i = 0; i < contact_count; i++)
     {
-        printf("%-3d %-30s %-15s %-25s\n", i + 1, contacts[i].name, contacts[i].phone,
+        printf("%-3d %-30.30s %-16.16s %-25.25s\n", i + 1, contacts[i].name, contacts[i].phone,
                contacts[i].email);
     }
     printf("-------------------------------------------------------------------------\n"); // Print
