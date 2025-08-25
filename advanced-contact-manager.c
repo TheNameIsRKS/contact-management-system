@@ -246,7 +246,7 @@ void import_from_vcf(const char *filename)
         return;
     }
 
-    char line[256]; // Buffer to store each line from file
+    char line[512]; // Buffer to store each line from file
     char name[MAX_NAME_LENGTH] = "";
     char phone[MAX_PHONE_LENGTH] = "";
     char email[MAX_EMAIL_LENGTH] = "";
