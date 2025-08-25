@@ -634,7 +634,7 @@ void get_validated_input(const char *prompt, char *buffer, size_t size, const ch
         const char *format_msg;
         if (strcmp(pattern, NAME_REGEX) == 0)
         {
-            format_msg = "Letters, spaces, hyphens, or apostrophes (1-48 chars)";
+            format_msg = "Letters, spaces, hyphens, or apostrophes (1-49 chars)";
         }
         else if (strcmp(pattern, PHONE_REGEX) == 0)
         {
