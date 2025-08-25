@@ -694,7 +694,7 @@ void add_contacts(void)
     }
 
     // Get and validate contact details
-    get_valid_input("Enter name (1-48 chars): ", contacts[contact_count].name, MAX_NAME_LENGTH,
+    get_valid_input("Enter name (1-49 chars): ", contacts[contact_count].name, MAX_NAME_LENGTH,
                     NAME_REGEX); // Get name
     get_valid_input(
         "Enter phone e.g., (International: +14155552671), (Indian: +919876543210 or 9876543210): ",
@@ -774,7 +774,7 @@ void update_contact(void)
             int updated = 0; // Track if updates were made
 
             // Update name
-            get_optional_valid_input("Enter new name (1-48 chars): ", new_name, MAX_NAME_LENGTH,
+            get_optional_valid_input("Enter new name (1-49 chars): ", new_name, MAX_NAME_LENGTH,
                                      NAME_REGEX);
             if (new_name[0] != '\0' && strcmp(new_name, contacts[i].name) != 0)
             {
