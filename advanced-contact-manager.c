@@ -6,24 +6,108 @@
  * of contacts, each with a name, phone number, and email address. The system provides a menu-driven
  * interface with the following features:
  *
- * - Add Contacts: Allows users to add a new contact with validated name, phone, and email inputs.
- * - View Contacts: Displays all contacts in a formatted table with index, name, phone, and email.
- * - Search Contacts: Supports exact or partial name searches, displaying matching contacts.
- * - Delete Contacts: Deletes a contact by name after user confirmation.
- * - Update Contacts: Updates contact details (name, phone, email) with optional fields.
- * - Sort Contacts: Sorts contacts by name, phone, or email using the merge sort algorithm.
- * - Save/Load Contacts: Persists contacts to 'contacts.txt' in CSV format and loads them on startup.
+ * - Core Features:
+ *   • Add Contact:
+ *     - Prompts user for Name, Phone, and Email.
+ *     - Each field is validated with regex:
+ *       · Name → letters/spaces only, max length enforced.
+ *       · Phone → Indian and International number format.
+ *       · Email → must match standard email pattern.
+ *     - Input sanitization:
+ *       · Trims whitespace.
+ *       · Replaces commas (to maintain CSV compatibility).
+ *     - Adds contact if valid and space is available.
  *
- * The system uses regular expressions (regex) to validate input formats for names, phone numbers,
- * and emails. It ensures case-insensitive name comparisons using strcasecmp and sanitizes inputs
- * by trimming whitespace and replacing commas to maintain CSV compatibility. Helper functions
- * handle input validation, sanitization, and file operations, with robust error handling and
- * user feedback using emojis for visual cues.
+ *   • View Contacts:
+ *     - Displays all contacts in a formatted table:
+ *       · Columns: Index | Name | Phone | Email
+ *       - Empty fields shown as blank.
  *
- * The program stores up to 100 contacts in memory, with defined maximum lengths for fields to
- * prevent buffer overflows. It uses a merge sort algorithm for efficient sorting and ensures
- * data integrity when saving/loading from the file.
+ *   • Search Contacts:
+ *     - Allows search by full or partial name (case-insensitive).
+ *     - Matches displayed in table format.
+ *
+ *   • Update Contact:
+ *     - Prompts for existing contact by name.
+ *     - Allows updating Name / Phone / Email individually.
+ *     - Empty input means "keep old value".
+ *     - Validation is applied on new values.
+ *
+ *   • Delete Contact:
+ *     - Prompts for contact name.
+ *     - If found, asks for confirmation (Y/N).
+ *     - On confirmation, removes contact and shifts array.
+ *
+ *   • Sort Contacts:
+ *     - Sorts contacts in ascending order by chosen field:
+ *       · Name
+ *       · Phone
+ *       · Email
+ *     - Uses Merge Sort (efficient O(n log n)).
+ *
+ * - File Persistence:
+ *   • Save Contacts:
+ *     - Saves all contacts to "contacts.txt" (CSV format).
+ *     - Each line: name,phone,email
+ *
+ *   • Load Contacts:
+ *     - Loads existing contacts from "contacts.txt" at startup.
+ *     - Ensures max contact limit not exceeded.
+ *
+ * - vCard (VCF) Integration:
+ *   • Export to vCard:
+ *     - Writes contacts to "contacts.vcf" in vCard 3.0 format.
+ *     - Example:
+ *       BEGIN:VCARD
+ *       VERSION:3.0
+ *       FN:<Name>
+ *       TEL;TYPE=CELL:<Phone>
+ *       EMAIL;TYPE=WORK:<Email>
+ *       END:VCARD
+ *     - Only one Phone/Email per contact is exported.
+ *     - Phone = CELL, Email = WORK (fixed types).
+ *
+ *   • Import from vCard:
+ *     - Reads one or more VCARDs from file.
+ *     - Extracts FN, TEL, EMAIL lines.
+ *     - Only last TEL and EMAIL are stored (if multiple).
+ *     - On END:VCARD → adds new contact to memory.
+ *     - No duplicate prevention or extra validation.
+ *     - Stops if MAX_CONTACTS is reached.
+ *
+ * - Input Validation:
+ *   • Regex is used to validate formats:
+ *     - NAME_REGEX
+ *     - PHONE_REGEX
+ *     - EMAIL_REGEX
+ *   • Invalid inputs trigger re-prompt until corrected.
+ *
+ * - Sanitization Helpers:
+ *   • trim_whitespace → removes leading/trailing spaces.
+ *   • replace_commas  → replaces commas (CSV safe).
+ *   • sanitize_contact → applies both to all fields.
+ *
+ * - User Interface:
+ *   • Menu-driven system:
+ *       1. Add Contact
+ *       2. View Contacts
+ *       3. Search Contacts
+ *       4. Delete Contact
+ *       5. Update Contact
+ *       6. Sort Contacts
+ *       7. Export Contacts (VCF)
+ *       8. Import Contacts (VCF)
+ *       9. Exit
+ *   • Emoji-based feedback for user actions (✅, ❌, ℹ️).
+ *
+ * - Technical Notes:
+ *   • Stores contacts in memory (array of structs).
+ *   • Max capacity: 100 contacts.
+ *   • Field length limits prevent buffer overflow.
+ *   • Case-insensitive name comparison via strcasecmp().
+ *   • Error handling ensures stability during file I/O.
  */
+
 
 
 #include <ctype.h>     // Provides isspace() for whitespace trimming
@@ -48,11 +132,6 @@
 #define CONFIRM_REGEX "^[yYnN]$"  // Regex for y/n confirmation input
 #define SORT_CHOICE_REGEX "^[1-3]$"  // Regex for sort choice (1-3)
 
-// Return codes for get_input() function
-#define INPUT_OK 0         // Input successfully read and valid
-#define INPUT_TOO_LONG 1   // Input exceeded buffer size
-#define INPUT_EMPTY 2      // Input was empty after trimming
-
 
 // Function prototypes for contact management operations
 void add_contacts(void);          // Adds a new contact
@@ -65,20 +144,29 @@ void load_contacts(void);        // Loads contacts from file
 void save_contacts(void);        // Saves contacts to file
 int get_menu_choice(void);       // Gets and validates menu choice
 void sort_contacts(void);        // Sorts contacts based on user choice
-void export_to_vcf(const char *filename);
-void import_from_vcf(const char *filename);
 
-// Helper function prototypes for input handling and sorting
-int get_input(const char *prompt, char *buffer, size_t size);  // Reads input safely
-void get_validated_input(const char *prompt, char *buffer, size_t size, const char *pattern, int allow_empty);  // Validates input with regex
-void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);  // Strict input validation (no empty input)
-void get_optional_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);  // Optional input validation (allows empty)
 typedef struct
 {
     char name[MAX_NAME_LENGTH];   // Contact name
     char phone[MAX_PHONE_LENGTH]; // Contact phone number
     char email[MAX_EMAIL_LENGTH]; // Contact email address
 } Contact;
+
+Contact contacts[MAX_CONTACTS];  // Global array to store contacts
+int contact_count = 0;          // Tracks number of contacts
+
+static void trim_whitespace(char *s);      // Removes leading and trailing whitespace characters from a string
+static void replace_commas(char *s);       // Replaces commas in a string (to avoid format issues in CSV/VCF)
+static void sanitize_contact(Contact *c);  // Cleans up a contact's fields (name, phone, email) by applying trimming/replacement
+void export_to_vcf(const char *filename);  // Exports all saved contacts to a VCF (vCard) file
+void import_from_vcf(const char *filename); // Imports contacts from a VCF (vCard) file into the contact list
+
+
+// Helper function prototypes for input handling and sorting
+void get_input(const char *prompt, char *buffer, size_t size);  // Reads input safely
+void get_validated_input(const char *prompt, char *buffer, size_t size, const char *pattern, int allow_empty);  // Validates input with regex
+void get_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);  // Strict input validation (no empty input)
+void get_optional_valid_input(const char *prompt, char *buffer, size_t size, const char *pattern);  // Optional input validation (allows empty)
 
 typedef enum {
     SORT_BY_NAME,   // Sort by contact name
@@ -89,8 +177,6 @@ typedef enum {
 void merge(Contact arr[], int left, int mid, int right, SortField field);  // Merges two sorted subarrays
 void merge_sort(Contact arr[], int left, int right, SortField field);       // Implements merge sort for contacts
 
-Contact contacts[MAX_CONTACTS];  // Global array to store contacts
-int contact_count = 0;          // Tracks number of contacts
 
 // Main function: program entry point
 int main(void)
@@ -126,10 +212,10 @@ int main(void)
                 sort_contacts();  // Sort contacts
                 break;
             case 7:
-                export_to_vcf("contacts.vcf");
+                export_to_vcf("contacts.vcf"); //Export Contacts
                 break;
             case 8:
-                import_from_vcf("contacts.vcf");
+                import_from_vcf("Contacts1.vcf"); // Import contacts
                 break;
             case 9:
                 printf("Exiting the program. Goodbye!\n");  // Exit message
@@ -138,103 +224,104 @@ int main(void)
                 printf("Invalid choice. Please try again.\n");  // Handle invalid choice
         }
     }
-    while (choice != 7);  // Continue until user chooses to exit
+    while (choice != 9);  // Continue until user chooses to exit
     save_contacts();      // Save contacts to file before exiting
 }
 
 // Function to import contacts from VCF file
 void import_from_vcf(const char *filename)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "r");   // Open VCF file in read mode
     if (!file)
     {
         printf("❌ Could not open %s for reading.\n", filename);
         return;
     }
 
-    char line[256];
+    char line[256];   // Buffer to store each line from file
     char name[MAX_NAME_LENGTH] = "";
     char phone[MAX_PHONE_LENGTH] = "";
     char email[MAX_EMAIL_LENGTH] = "";
 
-    while (fgets(line, sizeof(line), file))
+    while (fgets(line, sizeof(line), file))   // Read file line by line
     {
-        // Remove newline
+        // Remove newline characters (\r or \n) at the end of the line
         line[strcspn(line, "\r\n")] = 0;
 
-        if (strncmp(line, "FN:", 3) == 0) // Full name
+        if (strncmp(line, "FN:", 3) == 0) // Full name line found
         {
-            strncpy(name, line + 3, MAX_NAME_LENGTH - 1);
-            name[MAX_NAME_LENGTH - 1] = '\0';
+            strncpy(name, line + 3, MAX_NAME_LENGTH - 1);   // Copy after "FN:"
+            name[MAX_NAME_LENGTH - 1] = '\0';              // Ensure null termination
         }
-        else if (strncmp(line, "TEL", 3) == 0) // Phone
+        else if (strncmp(line, "TEL", 3) == 0) // Phone line found
         {
-            char *p = strchr(line, ':');
+            char *p = strchr(line, ':');  // Find ':' to skip "TEL;TYPE=..."
             if (p)
             {
-                strncpy(phone, p + 1, MAX_PHONE_LENGTH - 1);
+                strncpy(phone, p + 1, MAX_PHONE_LENGTH - 1);  // Copy number
                 phone[MAX_PHONE_LENGTH - 1] = '\0';
             }
         }
-        else if (strncmp(line, "EMAIL", 5) == 0) // Email
+        else if (strncmp(line, "EMAIL", 5) == 0) // Email line found
         {
-            char *p = strchr(line, ':');
+            char *p = strchr(line, ':');  // Find ':' to skip "EMAIL;TYPE=..."
             if (p)
             {
-                strncpy(email, p + 1, MAX_EMAIL_LENGTH - 1);
+                strncpy(email, p + 1, MAX_EMAIL_LENGTH - 1);  // Copy email
                 email[MAX_EMAIL_LENGTH - 1] = '\0';
             }
         }
-        else if (strncmp(line, "END:VCARD", 9) == 0) // Contact finished
+        else if (strncmp(line, "END:VCARD", 9) == 0) // End of one contact
         {
-            if (contact_count < MAX_CONTACTS)
+            if (contact_count < MAX_CONTACTS)   // Store contact if not full
             {
                 strncpy(contacts[contact_count].name, name, MAX_NAME_LENGTH);
                 strncpy(contacts[contact_count].phone, phone, MAX_PHONE_LENGTH);
                 strncpy(contacts[contact_count].email, email, MAX_EMAIL_LENGTH);
-                contact_count++;
+                contact_count++;   // Increase total contact count
             }
 
-            // Reset for next vCard
+            // Reset for next contact
             name[0] = '\0';
             phone[0] = '\0';
             email[0] = '\0';
         }
     }
 
-    fclose(file);
+    fclose(file);  // Close VCF file after reading
     printf("✅ Imported %d contacts from %s\n", contact_count, filename);
 }
 
 // Export all contacts to a VCF (vCard) file with proper types
 void export_to_vcf(const char *filename) {
-    FILE *fp = fopen(filename, "w");  // Open file in write mode
+    FILE *fp = fopen(filename, "w");  // Open VCF file in write mode
     if (!fp) {
         printf("❌ Error: Could not open %s for writing.\n", filename);
         return;
     }
 
-    // Loop through all saved contacts
+    // Loop through all saved contacts and write them in vCard format
     for (int i = 0; i < contact_count; i++) {
         fprintf(fp, "BEGIN:VCARD\n");
         fprintf(fp, "VERSION:3.0\n");
 
-        fprintf(fp, "FN:%s\n", contacts[i].name);  // Full Name
+        fprintf(fp, "FN:%s\n", contacts[i].name);  // Write Full Name
 
-        // Phone stored as Mobile
+        // Phone is always exported as "Mobile"
         if (strlen(contacts[i].phone) > 0)
             fprintf(fp, "TEL;TYPE=CELL:%s\n", contacts[i].phone);
 
-        // Email stored as Work
+        // Email is always exported as "Work"
         if (strlen(contacts[i].email) > 0)
             fprintf(fp, "EMAIL;TYPE=WORK:%s\n", contacts[i].email);
 
-        fprintf(fp, "END:VCARD\n\n");  // End of vCard
+        fprintf(fp, "END:VCARD\n\n");  // End of one vCard
     }
 
-    fclose(fp);  // Close file
+    fclose(fp);  // Close VCF file after writing
     printf("✅ Contacts exported successfully to %s\n", filename);
 }
+
 
 
 // ----------------- Sanitization helpers -----------------
@@ -373,7 +460,7 @@ void load_contacts(void)
             continue; // Skip invalid contact
         }
 
-        contact_count++;  // Increment contact count
+        contact_count++;
 
         if (contact_count >= MAX_CONTACTS)
         {
@@ -398,8 +485,8 @@ void show_menu(void)
     printf("4. Delete Contacts\n");      // Option 4
     printf("5. Update Contact\n");       // Option 5
     printf("6. Sort Contacts\n");        // Option 6
-    printf("7. Export Contacts\n");      // Option 7
-    printf("8. Import Contacts\n");      // Option 8
+    printf("7. Export Contacts as VCF\n");      // Option 7
+    printf("8. Import Contacts from VCF\n");      // Option 8
     printf("9. Exit\n");                 // Option 9
 }
 
@@ -435,9 +522,9 @@ int get_menu_choice(void)
             }
 
             // Check range
-            if (choice < 1 || choice > 7)
+            if (choice < 1 || choice > 9)
             {
-                printf("Choice out of range. Please enter 1-7.\n");  // Handle out-of-range input
+                printf("Choice out of range. Please enter 1-9.\n");  // Handle out-of-range input
                 continue;
             }
 
@@ -453,89 +540,78 @@ int get_menu_choice(void)
 
 // ----------------- Helper input functions -----------------
 
-// Safely reads a line of input with prompt
-int get_input(const char *prompt, char *buffer, size_t size) {
-    printf("%s", prompt);  // Display prompt to the user
+// Safe line input (fgets + trim newline)
+void get_input(const char *prompt, char *buffer, size_t size)
+{
+    // Prompt
+    printf("%s", prompt);
 
-    // 1️⃣ Try reading input
-    if (fgets(buffer, (int)size, stdin) == NULL) {
-        // Case: fgets fails (EOF, Ctrl+D, input error)
-        buffer[0] = '\0';          // Set buffer empty
-        return INPUT_EMPTY;        // Return empty indicator
+    // Use fgets to allow spaces
+    if (fgets(buffer, (int)size, stdin) == NULL)
+    {
+        // if EOF or error, ensure buffer is empty string
+        buffer[0] = '\0';
+        return;
     }
 
-    // 2️⃣ Check if input was longer than buffer
+     // If input didn’t fit into buffer completely, flush leftover
     if (strchr(buffer, '\n') == NULL) {
-        // Case: user typed more characters than buffer can hold
         int ch;
-        while ((ch = getchar()) != '\n' && ch != EOF);  // Flush remaining input
-        printf("❌ Input too long. Maximum length is %zu characters.\n", size - 1);
-        buffer[0] = '\0';          // Reset buffer so caller can retry
-        return INPUT_TOO_LONG;     // Return too long indicator
+        while ((ch = getchar()) != '\n' && ch != EOF); // flush until newline
     }
 
-    // 3️⃣ Remove trailing newline from input
+    // Trim trailing newline if present
     buffer[strcspn(buffer, "\n")] = '\0';
 
-    // 4️⃣ Trim leading/trailing whitespace
     trim_whitespace(buffer);
-
-    // 5️⃣ Check if input is empty after trimming
-    if (buffer[0] == '\0') {
-        // Case: user entered only spaces/tabs, or pressed Enter
-        return INPUT_EMPTY;        // Return empty indicator
-    }
-
-    // ✅ Input is valid (not empty, not too long)
-    return INPUT_OK;
 }
 
-
-// Validates input with regex, optionally allowing empty input
-// Validates input with regex, optionally allowing empty input
+// Core function for validated input
+// allow_empty = 0 → empty input is rejected
+// allow_empty = 1 → empty input is accepted
+// Validate input with regex, optionally allow empty input
 void get_validated_input(const char *prompt, char *buffer, size_t size,
                          const char *pattern, int allow_empty) {
     while (1) {
-        // 1️⃣ Get input from user
-        int status = get_input(prompt, buffer, size);
+        get_input(prompt, buffer, size);
 
-        // 2️⃣ Handle different get_input() results
-        if (status == INPUT_TOO_LONG) {
-            // Case: input exceeded buffer size
-            continue; // Retry automatically
-        } else if (status == INPUT_EMPTY) {
-            // Case: input is empty after trimming
-            if (allow_empty) {
-                return; // Accept empty input if allowed
-            }
-            printf("❌ Input cannot be empty. Please try again..\n"); // Reject empty input
-            continue; // Retry
+        // Empty input handling
+        if (buffer[0] == '\0') {
+            if (allow_empty) return; // accept empty if allowed
+            printf("❌ Input cannot be empty. Please try again.\n");
+            continue;
         }
 
-        // 3️⃣ Input is valid length, now validate with regex if provided
+        // Length check
+        if (strlen(buffer) >= size) {
+            printf("❌ Input too long. Maximum length is %zu characters.\n", size - 1);
+            continue;
+        }
+
+        // Validate regex if provided
         if (pattern == NULL || validate_with_regex(pattern, buffer)) {
-            return; // Valid input, return to caller
+            return; // ✅ Valid input
         }
 
-        // 4️⃣ Regex failed → provide feedback on expected format
+        // Give user an idea of expected format
         const char *format_msg;
         if (strcmp(pattern, NAME_REGEX) == 0) {
-            format_msg = "Letters, spaces, hyphens, or apostrophes (1-48 chars)";  // Name format
+            format_msg = "Letters, spaces, hyphens, or apostrophes (1-48 chars)";
         } else if (strcmp(pattern, PHONE_REGEX) == 0) {
-            format_msg = "10-15 digits, optional + e.g., (International: +14155552671), (Indian: +919876543210 or 9876543210)";  // Phone format
+            format_msg = "10-15 digits, optional + e.g., (International: +14155552671), (Indian: +919876543210 or 9876543210)";
         } else if (strcmp(pattern, CONFIRM_REGEX) == 0) {
-            format_msg = "Single character: 'y' or 'n'";  // Confirmation format
+            format_msg = "Single character: 'y' or 'n'";
+        } else if (strcmp(pattern, "^[1-2]$") == 0) {
+            format_msg = "1 or 2";
         } else if (strcmp(pattern, SORT_CHOICE_REGEX) == 0) {
             if (!validate_with_regex("^[0-9]+$", buffer)) {
-                format_msg = "❌ Invalid input. Enter a number (1-3).";  // Non-numeric sort choice
+                format_msg = "❌ Invalid input. Enter a number (1-3).";
             } else {
-                format_msg = "❌ Choice out of range. Enter between 1 and 3.";  // Out-of-range sort choice
+                format_msg = "❌ Choice out of range. Enter between 1 and 3.";
             }
         } else {
-            format_msg = "Valid email (e.g., user@domain.com)";  // Email format
+            format_msg = "Valid email (e.g., user@domain.com)";
         }
-
-        // 5️⃣ Show the expected format message
         printf("Expected format: %s\n", format_msg);
     }
 }
@@ -591,16 +667,16 @@ void view_contacts(void)
 
     // Print table header
     printf("\n📒 Contact List (%d):\n", contact_count);
-    printf("---------------------------------------------------------------\n");
-    printf("%-3s %-15s %-15s %-25s\n", "#", "Name", "Phone", "Email");
-    printf("---------------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------------\n");
+    printf("%-3s %-30s %-15s %-25s\n", "#", "Name", "Phone", "Email");
+    printf("-------------------------------------------------------------------------\n");
 
     // Print each contact
     for (int i = 0; i < contact_count; i++) {
-        printf("%-3d %-15s %-15s %-25s\n",
+        printf("%-3d %-30s %-15s %-25s\n",
             i + 1, contacts[i].name, contacts[i].phone, contacts[i].email);
     }
-    printf("---------------------------------------------------------------\n");  // Print table footer
+    printf("-------------------------------------------------------------------------\n");  // Print table footer
 }
 
 // ----------------- Update contact -----------------
